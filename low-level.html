@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centricity Low-Level Data Handling Flow</title>
+    <style>
+        body {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #2d2d2d;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #61dafb;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: normal;
+            border-bottom: 2px solid #61dafb;
+            padding-bottom: 10px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: #333;
+            padding: 15px 20px;
+            border-bottom: 1px solid #444;
+            font-weight: bold;
+            color: #61dafb;
+            font-size: 16px;
+        }
+        
+        .section-content {
+            padding: 20px;
+        }
+        
+        .state-layer {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .state-box {
+            background: #3a3a3a;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+        }
+        
+        .state-title {
+            color: #f39c12;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .flow-step {
+            background: #4a4a4a;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #666;
+            font-size: 11px;
+            white-space: nowrap;
+            color: #e0e0e0;
+        }
+        
+        .flow-arrow {
+            color: #888;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+        
+        .state-machine {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .state {
+            background: #2a2a2a;
+            border: 2px solid #555;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .state.initial { border-color: #27ae60; }
+        .state.processing { border-color: #f39c12; }
+        .state.success { border-color: #2ecc71; }
+        .state.error { border-color: #e74c3c; }
+        
+        .transition {
+            margin: 15px 0;
+            padding: 10px;
+            background: #363636;
+            border-left: 3px solid #61dafb;
+            font-size: 12px;
+        }
+        
+        .data-structure {
+            background: #252525;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .keyword { color: #c678dd; }
+        .string { color: #98c379; }
+        .number { color: #d19a66; }
+        .comment { color: #5c6370; font-style: italic; }
+        .function { color: #61dafb; }
+        .type { color: #e06c75; }
+        
+        .message-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin: 15px 0;
+        }
+        
+        .message {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: #333;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        
+        .message-type {
+            background: #555;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-right: 10px;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .websocket { background: #27ae60; }
+        .database { background: #3498db; }
+        .client { background: #9b59b6; }
+        .server { background: #e67e22; }
+        
+        .conflict-resolution {
+            background: #2c1810;
+            border: 1px solid #8b4513;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .performance-box {
+            background: #1a2332;
+            border: 1px solid #34495e;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .state-layer {
+                grid-template-columns: 1fr;
+            }
+            .flow-diagram {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .flow-step {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Centricity Low-Level Data Handling Flow</h1>
+        
+        <div class="section">
+            <div class="section-header">MobX Observable State Architecture</div>
+            <div class="section-content">
+                <div class="state-layer">
+                    <div class="state-box">
+                        <div class="state-title">Remote State Layer</div>
+                        <div class="code-block">
+<span class="keyword">objects</span> = <span class="function">observable.map</span>&lt;<span class="type">ID</span>, <span class="type">T</span>&gt;()
+<span class="comment">// Server-side source of truth</span>
+<span class="comment">// Updated via WebSocket messages</span>
+<span class="comment">// Read-only from client perspective</span>
+                        </div>
+                    </div>
+                    
+                    <div class="state-box">
+                        <div class="state-title">Local Modifications</div>
+                        <div class="code-block">
+<span class="keyword">localObjects</span> = <span class="function">observable.map</span>&lt;<span class="type">ID</span>, <span class="type">T</span>&gt;()
+<span class="comment">// User modifications not yet saved</span>
+<span class="comment">// Optimistic updates</span>
+<span class="comment">// Conflict detection source</span>
+                        </div>
+                    </div>
+                    
+                    <div class="state-box">
+                        <div class="state-title">Placeholder Objects</div>
+                        <div class="code-block">
+<span class="keyword">placeholderObjects</span> = <span class="function">observable.map</span>&lt;<span class="type">ID</span>, <span class="type">T</span>&gt;()
+<span class="comment">// Bulk edit templates</span>
+<span class="comment">// Mass operation staging</span>
+<span class="comment">// Template application</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-structure">
+                    <div class="state-title">State Synchronization Tracking</div>
+                    <div class="code-block">
+<span class="type">offset</span>?: <span class="keyword">number</span>                    <span class="comment">// Message ordering guarantee</span>
+<span class="type">dirtyMessageQueue</span>: <span class="type">ID</span>[] = []        <span class="comment">// Conflict resolution queue</span>
+<span class="type">pendingLocalIds</span> = <span class="function">observable.map</span>&lt;<span class="type">ID</span>, <span class="keyword">boolean</span>&gt;() <span class="comment">// Save state tracking</span>
+<span class="type">pendingCorrelationIds</span>: <span class="type">string</span>[] = [] <span class="comment">// Expected update tracking</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Message Processing Pipeline</div>
+            <div class="section-content">
+                <div class="flow-diagram">
+                    <div class="flow-step">Message Received</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Check Offset</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Validate Order</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Process or Queue</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Update State</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Increment Offset</div>
+                </div>
+                
+                <div class="code-block">
+<span class="function">processNextMessage</span>() {
+  <span class="keyword">if</span> (<span class="keyword">this</span>.offset === <span class="keyword">undefined</span>) <span class="keyword">return</span>; <span class="comment">// Wait for initialization</span>
+
+  <span class="keyword">const</span> message = <span class="keyword">this</span>.messageQueue.<span class="function">shift</span>();
+  <span class="keyword">if</span> (!message) <span class="keyword">return</span>;
+
+  <span class="comment">// Handle out-of-order messages</span>
+  <span class="keyword">if</span> (message.offset &lt; <span class="keyword">this</span>.expectedOffset) {
+    <span class="keyword">this</span>.dirtyMessageQueue.<span class="function">push</span>(message.entityId);
+    <span class="keyword">return</span>;
+  }
+
+  <span class="keyword">this</span>.<span class="function">processConfigMessage</span>(message);
+  <span class="keyword">this</span>.offset = message.offset;
+}
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">WebSocket State Machine</div>
+            <div class="section-content">
+                <div class="state-machine">
+                    <div class="state initial">
+                        <strong>CONNECTING</strong><br>
+                        <small>Initial connection attempt</small>
+                    </div>
+                    <div class="state processing">
+                        <strong>AUTHENTICATING</strong><br>
+                        <small>JWT validation</small>
+                    </div>
+                    <div class="state success">
+                        <strong>CONNECTED</strong><br>
+                        <small>Ready for messages</small>
+                    </div>
+                    <div class="state processing">
+                        <strong>RECONNECTING</strong><br>
+                        <small>Automatic reconnection</small>
+                    </div>
+                    <div class="state error">
+                        <strong>FAILED</strong><br>
+                        <small>Terminal failure</small>
+                    </div>
+                </div>
+                
+                <div class="transition">
+                    <strong>Message Lifecycle:</strong><br>
+                    Client Action → Create Protobuf → Add Correlation ID → Send Binary → Server Process → Database Update → Broadcast to Clients → Update Local State → UI Render
+                </div>
+                
+                <div class="code-block">
+<span class="function">sendTimedRequest</span>&lt;<span class="type">T</span>&gt;(request: <span class="keyword">any</span>, timeout = <span class="number">30000</span>): <span class="type">Promise</span>&lt;<span class="type">T</span>&gt; {
+  <span class="keyword">const</span> correlationId = <span class="keyword">this</span>.<span class="function">getUniqueCorrelationId</span>();
+  <span class="keyword">const</span> promise = <span class="keyword">new</span> <span class="type">Promise</span>&lt;<span class="type">T</span>&gt;(<span class="function">(resolve, reject)</span> =&gt; {
+    <span class="keyword">const</span> timer = <span class="function">setTimeout</span>(() =&gt; {
+      <span class="keyword">this</span>.pendingRequests.<span class="function">delete</span>(correlationId);
+      <span class="function">reject</span>(<span class="keyword">new</span> <span class="type">Error</span>(<span class="string">'Request timeout'</span>));
+    }, timeout);
+
+    <span class="keyword">this</span>.pendingRequests.<span class="function">set</span>(correlationId, { resolve, reject, timer });
+  });
+
+  <span class="keyword">this</span>.<span class="function">sendMessage</span>({ ...request, correlationId });
+  <span class="keyword">return</span> promise;
+}
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Entity State Transitions</div>
+            <div class="section-content">
+                <div class="message-flow">
+                    <div class="message">
+                        <div class="message-type client">CREATE</div>
+                        <div>createLocalObject() → localStatus = Create (negative ID)</div>
+                    </div>
+                    <div class="message">
+                        <div class="message-type client">UPDATE</div>
+                        <div>changeLocalObject() → localStatus = Update</div>
+                    </div>
+                    <div class="message">
+                        <div class="message-type client">DELETE</div>
+                        <div>deleteLocalObject() → localStatus = Delete</div>
+                    </div>
+                    <div class="message">
+                        <div class="message-type server">SAVE</div>
+                        <div>saveAllChangesToRemote() → Clear local state on success</div>
+                    </div>
+                </div>
+                
+                <div class="code-block">
+<span class="keyword">enum</span> <span class="type">EditableEntityOperationType</span> {
+  <span class="type">Create</span> = <span class="string">"Create"</span>,    <span class="comment">// New entity (negative ID)</span>
+  <span class="type">Update</span> = <span class="string">"Update"</span>,    <span class="comment">// Modified existing entity</span>
+  <span class="type">Delete</span> = <span class="string">"Delete"</span>     <span class="comment">// Marked for deletion</span>
+}
+
+<span class="comment">// Optimistic update pattern</span>
+@<span class="function">action</span> <span class="function">changeLocalObject</span>(object: <span class="type">T</span>) {
+  <span class="keyword">if</span> (object.localStatus !== <span class="type">EditableEntityOperationType</span>.Create) {
+    object.localStatus = <span class="type">EditableEntityOperationType</span>.Update;
+  }
+  
+  <span class="keyword">this</span>.<span class="function">setObject</span>(object);            <span class="comment">// Triggers UI re-render</span>
+  <span class="keyword">this</span>.pendingLocalIds.<span class="function">set</span>(object.id, <span class="keyword">true</span>); <span class="comment">// Queue for sync</span>
+}
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Command Execution State Flow</div>
+            <div class="section-content">
+                <div class="state-machine">
+                    <div class="state initial">PENDING</div>
+                    <div class="state processing">ACK</div>
+                    <div class="state processing">IN_PROGRESS</div>
+                    <div class="state success">SUCCESS</div>
+                    <div class="state error">FAILED</div>
+                    <div class="state error">TIMED_OUT</div>
+                </div>
+                
+                <div class="code-block">
+<span class="keyword">const</span> handleSendCommandGroup = <span class="keyword">async</span> () =&gt; {
+  <span class="comment">// 1. Send command and get ACK</span>
+  <span class="keyword">const</span> ackResponse = <span class="keyword">await</span> <span class="function">sendTimedCommandGroupRequest</span>(request, {
+    returnOnAck: <span class="keyword">true</span>
+  });
+
+  <span class="comment">// 2. Track execution with correlation ID</span>
+  <span class="keyword">this</span>.trackingCommands.<span class="function">set</span>(ackResponse.correlationId, {
+    startTime: <span class="type">Date</span>.<span class="function">now</span>(),
+    entityId,
+    status: <span class="type">CommandState</span>.IN_PROGRESS
+  });
+
+  <span class="comment">// 3. Listen for completion events</span>
+  <span class="keyword">this</span>.<span class="function">on</span>(<span class="string">'CommandGroupRequestSuccess'</span>, (response) =&gt; {
+    <span class="keyword">if</span> (response.correlationId === ackResponse.correlationId) {
+      <span class="keyword">this</span>.<span class="function">updateCommandStatus</span>(response.correlationId, <span class="type">CommandState</span>.SUCCESS);
+    }
+  });
+}
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Multi-Client Synchronization</div>
+            <div class="section-content">
+                <div class="flow-diagram">
+                    <div class="flow-step">Server Change</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">WebSocket Broadcast</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">All Connected Clients</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Message Queue</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Process in Order</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Update MobX Store</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">React Re-render</div>
+                </div>
+                
+                <div class="conflict-resolution">
+                    <div class="state-title">Conflict Resolution Algorithm</div>
+                    <div class="code-block">
+<span class="function">handleConfigMessage</span>(message: <span class="type">ConfigMessage</span>) {
+  <span class="keyword">const</span> hasLocalChanges = <span class="keyword">this</span>.localObjects.<span class="function">has</span>(message.entityId);
+  <span class="keyword">const</span> isExpectedUpdate = <span class="keyword">this</span>.pendingCorrelationIds.<span class="function">includes</span>(message.correlationId);
+
+  <span class="keyword">if</span> (hasLocalChanges && !isExpectedUpdate) {
+    <span class="comment">// Conflict detected - queue for manual resolution</span>
+    <span class="keyword">this</span>.dirtyMessageQueue.<span class="function">push</span>(message.entityId);
+    <span class="keyword">this</span>.<span class="function">emit</span>(<span class="string">'StateConflict'</span>, { entityId: message.entityId });
+    <span class="keyword">return</span>;
+  }
+
+  <span class="comment">// Safe to apply update</span>
+  <span class="keyword">this</span>.objects.<span class="function">set</span>(message.entityId, <span class="keyword">this</span>.<span class="function">protoToTypescript</span>(message));
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Performance Optimization Patterns</div>
+            <div class="section-content">
+                <div class="performance-box">
+                    <div class="state-title">Lazy Loading with Computed Properties</div>
+                    <div class="code-block">
+@<span class="function">computed</span> <span class="keyword">get</span> <span class="function">visionProgramsByHardwarePositionId</span>() {
+  <span class="keyword">return</span> <span class="type">Array</span>.<span class="function">from</span>(<span class="keyword">this</span>.objects.<span class="function">values</span>())
+    .<span class="function">filter</span>(vp =&gt; vp.hardwarePositionId)
+    .<span class="function">reduce</span>((acc, vp) =&gt; {
+      <span class="keyword">const</span> hpId = vp.hardwarePositionId!;
+      acc.<span class="function">set</span>(hpId, [...(acc.<span class="function">get</span>(hpId) || []), vp]);
+      <span class="keyword">return</span> acc;
+    }, <span class="keyword">new</span> <span class="type">Map</span>&lt;<span class="type">ID</span>, <span class="type">VisionProgram</span>[]&gt;());
+}
+                    </div>
+                </div>
+                
+                <div class="performance-box">
+                    <div class="state-title">Batched Operations</div>
+                    <div class="code-block">
+<span class="keyword">const</span> saveAllChangesToRemote = <span class="keyword">async</span> (): <span class="type">Promise</span>&lt;<span class="keyword">boolean</span>&gt; =&gt; {
+  <span class="keyword">const</span> localEntities = <span class="type">Array</span>.<span class="function">from</span>(<span class="keyword">this</span>.localObjects.<span class="function">values</span>());
+
+  <span class="comment">// Group by operation type</span>
+  <span class="keyword">const</span> creates = localEntities.<span class="function">filter</span>(e =&gt; e.localStatus === <span class="string">'Create'</span>);
+  <span class="keyword">const</span> updates = localEntities.<span class="function">filter</span>(e =&gt; e.localStatus === <span class="string">'Update'</span>);
+  <span class="keyword">const</span> deletes = localEntities.<span class="function">filter</span>(e =&gt; e.localStatus === <span class="string">'Delete'</span>);
+
+  <span class="comment">// Send as single batched message</span>
+  <span class="keyword">const</span> batchedMessage = <span class="keyword">this</span>.<span class="function">createBatchedCRUDOperation</span>({
+    creates: creates.<span class="function">map</span>(e =&gt; <span class="keyword">this</span>.<span class="function">typescriptToProto</span>(e)),
+    updates: updates.<span class="function">map</span>(e =&gt; <span class="keyword">this</span>.<span class="function">typescriptToProto</span>(e)),
+    deletes: deletes.<span class="function">map</span>(e =&gt; ({ id: e.id }))
+  });
+
+  <span class="keyword">return</span> <span class="keyword">this</span>.<span class="function">sendTimedRequest</span>(batchedMessage);
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Error Recovery Mechanisms</div>
+            <div class="section-content">
+                <div class="code-block">
+@<span class="function">action</span> <span class="function">reconcileState</span>() {
+  <span class="comment">// Clear dirty messages if local state is clean</span>
+  <span class="keyword">this</span>.dirtyMessageQueue = <span class="keyword">this</span>.dirtyMessageQueue.<span class="function">filter</span>(entityId =&gt; {
+    <span class="keyword">const</span> hasLocalChanges = <span class="keyword">this</span>.localObjects.<span class="function">has</span>(entityId);
+    <span class="keyword">if</span> (!hasLocalChanges) {
+      <span class="comment">// No local changes - safe to remove from dirty queue</span>
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+    }
+    <span class="keyword">return</span> <span class="keyword">true</span>;
+  });
+
+  <span class="comment">// Process any remaining dirty messages</span>
+  <span class="keyword">this</span>.dirtyMessageQueue.<span class="function">forEach</span>(entityId =&gt; {
+    <span class="keyword">this</span>.<span class="function">emit</span>(<span class="string">'ConflictResolution'</span>, { entityId });
+  });
+}
+                </div>
+                
+                <div class="transition">
+                    <strong>Recovery Strategies:</strong><br>
+                    • Automatic state reconciliation on connection restore<br>
+                    • Dirty message queue cleanup based on local state<br>
+                    • Conflict resolution events for manual intervention<br>
+                    • Correlation ID timeout handling for failed operations
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
