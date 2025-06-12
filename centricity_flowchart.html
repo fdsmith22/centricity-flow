@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centricity Project Architecture Flowchart</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .section h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.8em;
+            border-bottom: 3px solid;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .services { background: linear-gradient(135deg, #e3f2fd, #bbdefb); }
+        .services h2 { border-color: #2196f3; }
+        
+        .workflow { background: linear-gradient(135deg, #f3e5f5, #e1bee7); }
+        .workflow h2 { border-color: #9c27b0; }
+        
+        .websocket { background: linear-gradient(135deg, #e8f5e8, #c8e6c9); }
+        .websocket h2 { border-color: #4caf50; }
+        
+        .security { background: linear-gradient(135deg, #fff3e0, #ffe0b2); }
+        .security h2 { border-color: #ff9800; }
+        
+        .flowchart {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        
+        .flow-item {
+            flex: 1;
+            min-width: 250px;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .flow-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .flow-item:hover::before {
+            left: 100%;
+        }
+        
+        .flow-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+        }
+        
+        .frontend { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .backend { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .database { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .external { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        
+        .arrow {
+            font-size: 2em;
+            color: #666;
+            margin: 10px 0;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .step-flow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .step {
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 10px;
+            font-size: 0.9em;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .step::before {
+            content: attr(data-step);
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .step:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .websocket-type {
+            margin: 15px 0;
+            padding: 15px;
+            border-left: 5px solid;
+            border-radius: 0 8px 8px 0;
+            background: rgba(255,255,255,0.7);
+        }
+        
+        .config-ws { border-color: #e91e63; }
+        .command-ws { border-color: #2196f3; }
+        .pipeline-ws { border-color: #ff9800; }
+        .controller-ws { border-color: #4caf50; }
+        
+        .data-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .data-node {
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 25px;
+            font-size: 0.9em;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            white-space: nowrap;
+        }
+        
+        .flow-arrow {
+            color: #666;
+            font-size: 1.5em;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            h1 { font-size: 2em; }
+            .flowchart { flex-direction: column; }
+            .data-flow { flex-direction: column; }
+            .flow-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ Centricity Project Architecture</h1>
+        
+        <div class="section services">
+            <h2>🔧 Core Services Architecture</h2>
+            <div class="flowchart">
+                <div class="flow-item frontend">
+                    <h3>Frontend Layer</h3>
+                    <p>• React SPA<br>• Nginx Proxy<br>• MobX Stores</p>
+                </div>
+                <div class="flow-item backend">
+                    <h3>Backend Services</h3>
+                    <p>• Express API<br>• Auth Service<br>• File Renderer<br>• Image Processing</p>
+                </div>
+                <div class="flow-item database">
+                    <h3>Data Layer</h3>
+                    <p>• MySQL<br>• TimescaleDB<br>• Google Cloud Storage</p>
+                </div>
+                <div class="flow-item external">
+                    <h3>External Integrations</h3>
+                    <p>• Mapbox<br>• Grafana<br>• Google OAuth<br>• Pipedrive</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section workflow">
+            <h2>🔄 Application Initialization Flow</h2>
+            <div class="step-flow">
+                <div class="step" data-step="1">User navigates to app URL</div>
+                <div class="step" data-step="2">Nginx serves React app</div>
+                <div class="step" data-step="3">React app initializes providers</div>
+                <div class="step" data-step="4">Check authentication status</div>
+                <div class="step" data-step="5">Redirect to login if needed</div>
+                <div class="step" data-step="6">Fetch user permissions</div>
+                <div class="step" data-step="7">Initialize MobX stores</div>
+                <div class="step" data-step="8">Establish WebSocket connections</div>
+                <div class="step" data-step="9">Load configuration data</div>
+                <div class="step" data-step="10">Render UI with permissions</div>
+            </div>
+        </div>
+
+        <div class="section websocket">
+            <h2>🌐 WebSocket Interactions</h2>
+            
+            <div class="websocket-type config-ws">
+                <h3>Configuration Management WebSocket</h3>
+                <p><strong>Purpose:</strong> Real-time configuration synchronization</p>
+                <p><strong>Messages:</strong> 150+ entity CRUD operations</p>
+                <p><strong>Flow:</strong> Bidirectional configuration changes</p>
+                <p><strong>Auth:</strong> dashboard_config_management_access</p>
+            </div>
+            
+            <div class="websocket-type command-ws">
+                <h3>Command Management WebSocket</h3>
+                <p><strong>Purpose:</strong> Asynchronous command execution</p>
+                <p><strong>Messages:</strong> CommandGroupRequest, CommandRequest</p>
+                <p><strong>Flow:</strong> Request/Response with correlation IDs</p>
+                <p><strong>Auth:</strong> centricity_command_management_access</p>
+            </div>
+            
+            <div class="websocket-type pipeline-ws">
+                <h3>Pipeline Reconfiguration WebSocket</h3>
+                <p><strong>Purpose:</strong> Dynamic pipeline updates</p>
+                <p><strong>Messages:</strong> ReconfigurePipeline, PipelineReconfigured</p>
+                <p><strong>Flow:</strong> Request/Response pattern</p>
+                <p><strong>Auth:</strong> centricity_pipeline_reconfiguration_access</p>
+            </div>
+            
+            <div class="websocket-type controller-ws">
+                <h3>Controller State WebSocket</h3>
+                <p><strong>Purpose:</strong> Monitor controller states</p>
+                <p><strong>Messages:</strong> Controller state updates</p>
+                <p><strong>Flow:</strong> Server-to-client push</p>
+                <p><strong>Auth:</strong> dashboard_controller_state_access</p>
+            </div>
+        </div>
+
+        <div class="section workflow">
+            <h2>📊 Configuration Update Workflow</h2>
+            <div class="data-flow">
+                <div class="data-node">User Modifies Entity</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">UI Validates Input</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Send via WebSocket</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Server Validates</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Persist to Database</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Broadcast to Clients</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Update MobX Stores</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">UI Re-renders</div>
+            </div>
+        </div>
+
+        <div class="section workflow">
+            <h2>⚡ Command Execution Flow</h2>
+            <div class="data-flow">
+                <div class="data-node">User Triggers Command</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Create CommandGroupRequest</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Send via Command WebSocket</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Server ACK</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Execute on Device</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Status Updates</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Match by Correlation ID</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Show Result in UI</div>
+            </div>
+        </div>
+
+        <div class="section security">
+            <h2>🔒 Security & Authentication Flow</h2>
+            <div class="step-flow">
+                <div class="step" data-step="1">Google OAuth Login</div>
+                <div class="step" data-step="2">Server validates OAuth token</div>
+                <div class="step" data-step="3">Generate application JWT</div>
+                <div class="step" data-step="4">Store JWT in browser</div>
+                <div class="step" data-step="5">Include JWT in requests</div>
+                <div class="step" data-step="6">Role-based access control</div>
+                <div class="step" data-step="7">Project-based permissions</div>
+                <div class="step" data-step="8">WebSocket-specific claims</div>
+            </div>
+        </div>
+
+        <div class="section workflow">
+            <h2>🗂️ Data Flow Patterns</h2>
+            
+            <h3>📖 Read Path</h3>
+            <div class="data-flow">
+                <div class="data-node">User Request</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">React Component</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">MobX Store</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">React Query</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Express API</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Database</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Store Update</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">UI Render</div>
+            </div>
+            
+            <h3>✏️ Write Path</h3>
+            <div class="data-flow">
+                <div class="data-node">User Action</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">React Component</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">MobX Action</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">WebSocket Message</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Express Server</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Validation</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Database</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Broadcast</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">UI Re-render</div>
+            </div>
+            
+            <h3>⚡ Real-time Path</h3>
+            <div class="data-flow">
+                <div class="data-node">External Change</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Server Detection</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">WebSocket Broadcast</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">All Connected Clients</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Message Processing</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">Store Updates</div>
+                <div class="flow-arrow">→</div>
+                <div class="data-node">UI Re-render</div>
+            </div>
+        </div>
+
+        <div class="section services">
+            <h2>🎯 Key Design Patterns</h2>
+            <div class="flowchart">
+                <div class="flow-item frontend">Repository Pattern<br><small>Data access abstraction</small></div>
+                <div class="flow-item backend">Observer Pattern<br><small>MobX reactive updates</small></div>
+                <div class="flow-item database">Provider Pattern<br><small>React context providers</small></div>
+                <div class="flow-item external">Singleton Pattern<br><small>Store instances</small></div>
+                <div class="flow-item frontend">Factory Pattern<br><small>Entity creation</small></div>
+                <div class="flow-item backend">Command Pattern<br><small>Async command execution</small></div>
+                <div class="flow-item database">Event-Driven Architecture<br><small>WebSocket messaging</small></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((step, index) => {
+                step.style.animationDelay = `${index * 0.1}s`;
+                step.style.animation = 'fadeInUp 0.6s ease forwards';
+            });
+            
+            const flowItems = document.querySelectorAll('.flow-item');
+            flowItems.forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.2}s`;
+                item.style.animation = 'fadeInScale 0.8s ease forwards';
+            });
+        });
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes fadeInScale {
+                from {
+                    opacity: 0;
+                    transform: scale(0.8);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+            
+            .step, .flow-item {
+                opacity: 0;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
